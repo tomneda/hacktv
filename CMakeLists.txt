@@ -1,14 +1,23 @@
-# Specify the minimum version for CMake
 cmake_minimum_required(VERSION 3.10)
+project(HackTv)
 
-# Project's name
-project(HackTv C)
+find_package(Git REQUIRED)
+execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --pretty='%cd' --date=format:'%Y%m%d' --dirty --always OUTPUT_VARIABLE VERSION)
 
-# Set the C Flags
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -pthread -O3")
+set(EXTRA_CFLAGS "")
+set(EXTRA_LDFLAGS "")
+set(EXTRA_PKGS "")
+set(CROSS_HOST "")
 
-# Inform CMake where the source files are
-set(SOURCE_FILES
+set(CMAKE_C_COMPILER ${CROSS_HOST}gcc)
+set(PKGCONF pkg-config)
+set(CMAKE_C_FLAGS "-g -Wall -pthread -O3 ${EXTRA_CFLAGS} -DVERSION=\\\"${VERSION}\\\"")
+set(CMAKE_EXE_LINKER_FLAGS "-g -lm -pthread ${EXTRA_LDFLAGS}")
+
+include(FindPkgConfig)
+pkg_check_modules(PKGS REQUIRED libavcodec libavformat libavdevice libswscale libswresample libavutil ${EXTRA_PKGS})
+
+set(SOURCES
         src/hacktv.c
         src/common.c
         src/fir.c
@@ -34,43 +43,26 @@ set(SOURCE_FILES
         src/rf_file.c
 )
 
-# Conditionally add source files
-# PkgConfig would be useful here, but to keep this simple you may manually uncomment based on your needs 
+if(${PKGCONF} --exists libhackrf)
+  list(APPEND SOURCES rf_hackrf.c)
+  list(APPEND PKGS libhackrf)
+  add_definitions("-DHAVE_HACKRF")
+endif()
 
-#list(APPEND SOURCE_FILES rf_hackrf.c)
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHAVE_HACKRF")
+if(${PKGCONF} --exists SoapySDR)
+  list(APPEND SOURCES rf_soapysdr.c)
+  list(APPEND PKGS SoapySDR)
+  add_definitions("-DHAVE_SOAPYSDR")
+endif()
 
-#list(APPEND SOURCE_FILES rf_soapysdr.c)
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHAVE_SOAPYSDR")
+if(${PKGCONF} --exists libosmo-fl2k)
+  list(APPEND SOURCES rf_fl2k.c)
+  list(APPEND PKGS libosmo-fl2k)
+  add_definitions("-DHAVE_FL2K")
+endif()
 
-#list(APPEND SOURCE_FILES rf_fl2k.c)
-#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DHAVE_FL2K")
+add_executable(hacktv ${SOURCES})
+target_include_directories(hacktv PRIVATE ${PKGS_INCLUDE_DIRS})
+target_link_libraries(hacktv PRIVATE ${PKGS_LIBRARIES})
 
-# Add the binary tree directory to the search path for include files
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-# Tell CMake to create the executable
-add_executable(HackTv ${SOURCE_FILES})
-
-# Link the required libraries
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(AV REQUIRED libavcodec libavformat libavdevice libswscale libswresample libavutil)
-target_link_libraries(HackTv ${AV_LIBRARIES})
-target_include_directories(HackTv PUBLIC ${AV_INCLUDE_DIRS})
-target_compile_options(HackTv PUBLIC ${AV_CFLAGS_OTHER})
-
-#Extra libraries if they exist. Uncomment if you need.
-#pkg_check_modules(HACKRF REQUIRED libhackrf)
-#target_link_libraries(HackTv ${HACKRF_LIBRARIES})
-#target_include_directories(HackTv PUBLIC ${HACKRF_INCLUDE_DIRS})
-#target_compile_options(HackTv PUBLIC ${HACKRF_CFLAGS_OTHER})
-
-#pkg_check_modules(SOAPYSDR REQUIRED SoapySDR)
-#target_link_libraries(HackTv ${SOAPYSDR_LIBRARIES})
-#target_include_directories(HackTv PUBLIC ${SOAPYSDR_INCLUDE_DIRS})
-#target_compile_options(HackTv PUBLIC ${SOAPYSDR_CFLAGS_OTHER})
-
-#pkg_check_modules(FL2K REQUIRED libosmo-fl2k)
-#target_link_libraries(HackTv ${FL2K_LIBRARIES})
-#target_include_directories(HackTv PUBLIC ${FL2K_INCLUDE_DIRS})
-#target_compile_options(HackTv PUBLIC ${FL2K_CFLAGS_OTHER})
+install(TARGETS hacktv RUNTIME DESTINATION bin)
