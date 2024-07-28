@@ -23,6 +23,7 @@
 #include "hacktv.h"
 #include "av.h"
 #include "rf.h"
+#include <assert.h>
 
 static volatile sig_atomic_t _abort = 0;
 static volatile sig_atomic_t _signal = 0;
@@ -581,7 +582,8 @@ int main(int argc, char *argv[])
 				/* Unrecognised output type, default to file */
 				if(sub != NULL)
 				{
-					/* Recolonise */
+					assert(0); // the construct below may write in non allcated memory, check if even called
+          /* Recolonise */
 					sub--;
 					*sub = ':';
 				}

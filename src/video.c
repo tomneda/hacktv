@@ -24,6 +24,7 @@
 #include "dance.h"
 #include "hacktv.h"
 #include "av.h"
+#include <assert.h>
 
 /* 
  * Video generation
@@ -3545,9 +3546,10 @@ static int _vid_passthru_process(vid_t *s, void *arg, int nlines, vid_line_t **l
 	{
 		return(1);
 	}
-	
-	fread(s->passline, sizeof(int16_t) * 2, l->width, s->passthru);
-	
+
+  size_t ret = fread(s->passline, sizeof(int16_t) * 2, l->width, s->passthru);
+  assert(ret == l->width);
+
 	for(x = 0; x < l->width * 2; x++)
 	{
 		l->output[x] += s->passline[x];
