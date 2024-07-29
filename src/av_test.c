@@ -112,19 +112,21 @@ int av_test_open(av_t *av)
 			}
 			else if(y < s->height - 120)
 			{
-				/* 75% red */
-				c = 0xBF0000;
+				//c = 0xBF0000; // 75% red
+        c = 0xFFFF00; // 100% yellow
 			}
 			else if(y < s->height - 100)
 			{
 				/* Gradient black to white */
 				c = x * 0xFF / (s->width - 1);
+        c = (~c) & 0xFF;
 				c = c << 16 | c << 8 | c;
 			}
 			else
 			{
 				/* 8 level grey bars */
 				c = x * 0xFF / (s->width - 1);
+        c = (~c) & 0xFF;
 				c &= 0xE0;
 				c = c | (c >> 3) | (c >> 6);
 				c = c << 16 | c << 8 | c;

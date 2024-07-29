@@ -500,7 +500,7 @@ int main(int argc, char *argv[])
 	s.mode = "i";
 	s.samplerate = 16000000;
 	s.pixelrate = 0;
-	s.level = 1.0;
+	s.level = 1.0f;
 	s.deviation = -1;
 	s.gamma = -1;
 	s.interlace = 0;
@@ -582,7 +582,7 @@ int main(int argc, char *argv[])
 				/* Unrecognised output type, default to file */
 				if(sub != NULL)
 				{
-					assert(0); // the construct below may write in non allcated memory, check if even called
+					assert(0); // the construct below may write in non allocated memory, check if even called
           /* Recolonise */
 					sub--;
 					*sub = ':';
