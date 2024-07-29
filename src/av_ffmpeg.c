@@ -1236,6 +1236,12 @@ int av_ffmpeg_open(av_t *av, char *input_url, char *format, char *options)
 				av->width, av->height,
 				AV_PIX_FMT_RGB32, av_cpu_max_align()
 			);
+
+			if(r <= 0)
+			{
+				fprintf(stderr, "Error allocating video memory.\n");
+				return(HACKTV_ERROR);
+			}
 		}
 		
 		r = pthread_create(&s->video_decode_thread, NULL, &_video_decode_thread, (void *) s);
