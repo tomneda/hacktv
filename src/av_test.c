@@ -81,9 +81,7 @@ int av_test_open(av_t *av)
 	};
 	av_test_t *s;
 	int c, x, y;
-	double d;
-	int16_t l;
-	
+
 	s = calloc(1, sizeof(av_test_t));
 	if(!s)
 	{
@@ -104,13 +102,13 @@ int av_test_open(av_t *av)
 	{
 		for(x = 0; x < s->width; x++)
 		{
-			if(y < s->height - 140)
+			if(y < s->height - 220) // 140
 			{
 				/* 75% colour bars */
 				c = 7 - x * 8 / s->width;
 				c = bars[c];
 			}
-			else if(y < s->height - 120)
+			else if(y < s->height - 200)  // 120
 			{
 				//c = 0xBF0000; // 75% red
         c = 0xFFFF00; // 100% yellow
@@ -140,25 +138,25 @@ int av_test_open(av_t *av)
 	if(s->width >= LOGO_WIDTH * LOGO_SCALE &&
 	   s->height >= LOGO_HEIGHT * LOGO_SCALE)
 	{
-		x = s->width / 2;
-		y = s->height / 10;
-		
 		for(x = 0; x < LOGO_WIDTH * LOGO_SCALE; x++)
 		{
 			for(y = 0; y < LOGO_HEIGHT * LOGO_SCALE; y++)
 			{
 				c = _logo[y / LOGO_SCALE * LOGO_WIDTH + x / LOGO_SCALE] == ' ' ? 0x000000 : 0xFFFFFF;
-				
+
 				s->video[(s->height / 10 + y) * s->width + ((s->width - LOGO_WIDTH * LOGO_SCALE) / 2) + x] = c;
 			}
 		}
 	}
-	
+
 	/* Generate the 1khz test tones (BBC 1 style) */
-	d = 1000.0 * 2 * M_PI * av->sample_rate.den / av->sample_rate.num;
+	const double dl = 1000.0 * 2 * M_PI * av->sample_rate.den / av->sample_rate.num;
+
+	const double dr =  800.0 * 2 * M_PI * av->sample_rate.den / av->sample_rate.num;
 	y = av->sample_rate.num / av->sample_rate.den * 64 / 100; /* 640ms */
 	s->audio_samples = y * 10; /* 6.4 seconds */
 	s->audio = malloc(s->audio_samples * 2 * sizeof(int16_t));
+
 	if(!s->audio)
 	{
 		free(s->video);
@@ -168,32 +166,46 @@ int av_test_open(av_t *av)
 	
 	for(x = 0; x < s->audio_samples; x++)
 	{
-		l = sin(x * d) * INT16_MAX * 0.1;
-		
-		if(x < y)
+		const int16_t l = sin(x * dl) * INT16_MAX * 0.1;
+		const int16_t r = sin(x * dr) * INT16_MAX * 0.1;
+
+		if((x % (2 * y)) < y)
 		{
 			/* 0 - 640ms, interrupt left channel */
-			s->audio[x * 2 + 0] = 0;
-			s->audio[x * 2 + 1] = l;
-		}
-		else if(x >= y * 2 && x < y * 3)
-		{
-			/* 1280ms - 1920ms, interrupt right channel */
-			s->audio[x * 2 + 0] = l;
-			s->audio[x * 2 + 1] = 0;
-		}
-		else if(x >= y * 4 && x < y * 5)
-		{
-			/* 2560ms - 3200ms, interrupt right channel again */
 			s->audio[x * 2 + 0] = l;
 			s->audio[x * 2 + 1] = 0;
 		}
 		else
 		{
-			/* Use both channels for all other times */
-			s->audio[x * 2 + 0] = l; /* Left */
-			s->audio[x * 2 + 1] = l; /* Right */
+			/* 0 - 640ms, interrupt left channel */
+			s->audio[x * 2 + 0] = 0;
+			s->audio[x * 2 + 1] = r;
 		}
+
+		// if(x < y)
+		// {
+		// 	/* 0 - 640ms, interrupt left channel */
+		// 	s->audio[x * 2 + 0] = 0;
+		// 	s->audio[x * 2 + 1] = l;
+		// }
+		// else if(x >= y * 2 && x < y * 3)
+		// {
+		// 	/* 1280ms - 1920ms, interrupt right channel */
+		// 	s->audio[x * 2 + 0] = l;
+		// 	s->audio[x * 2 + 1] = 0;
+		// }
+		// else if(x >= y * 4 && x < y * 5)
+		// {
+		// 	/* 2560ms - 3200ms, interrupt right channel again */
+		// 	s->audio[x * 2 + 0] = l;
+		// 	s->audio[x * 2 + 1] = 0;
+		// }
+		// else
+		// {
+		// 	/* Use both channels for all other times */
+		// 	s->audio[x * 2 + 0] = l; /* Left */
+		// 	s->audio[x * 2 + 1] = l; /* Right */
+		// }
 	}
 	
 	/* Register the callback functions */
