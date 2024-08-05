@@ -87,224 +87,224 @@ typedef struct vid_t vid_t;
 /* RF modulation */
 
 typedef struct {
-	int16_t level;
-	int32_t counter;
-	cint32_t phase;
-	cint32_t *lut;
-	
-	limiter_t limiter;
-	int16_t sample;
-	
-	/* FM energy dispersal */
-	div_t ed_delta;
-	div_t ed_counter;
-	div_t ed_overflow;
-	
+  int16_t level;
+  int32_t counter;
+  cint32_t phase;
+  cint32_t *lut;
+
+  limiter_t limiter;
+  int16_t sample;
+
+  /* FM energy dispersal */
+  div_t ed_delta;
+  div_t ed_counter;
+  div_t ed_overflow;
+
 } _mod_fm_t;
 
 typedef struct {
-	int16_t level;
-	int32_t counter;
-	cint32_t phase;
-	cint32_t delta;
-	
-	int16_t sample;
-	
+  int16_t level;
+  int32_t counter;
+  cint32_t phase;
+  cint32_t delta;
+
+  int16_t sample;
+
 } _mod_am_t;
 
 typedef struct {
-	int32_t counter;
-	cint32_t phase;
-	cint32_t delta;
+  int32_t counter;
+  cint32_t phase;
+  cint32_t delta;
 } _mod_offset_t;
 
 
 
 typedef struct {
-	
-	/* Output type */
-	int output_type;
-	
-	/* Output modulation */
-	int modulation;
-	
-	/* Video bandwidth options */
-	double video_bw;
-	
-	/* VSB modulation options */
-	double vsb_upper_bw;
-	double vsb_lower_bw;
-	
-	/* FM modulation options */
-	double fm_level;
-	double fm_deviation;
-	double fm_energy_dispersal;
-	
-	/* Overall signal level (pre-modulation) */
-	double level;
-	
-	/* Swap the IQ in complex signals */
-	int swap_iq;
-	
-	/* Raw video baseband input */
-	char *raw_bb_file;
-	int16_t raw_bb_blanking_level;
-	int16_t raw_bb_white_level;
-	
-	/* Signal offset and passthru */
-	int64_t offset;
-	char *passthru;
-	
-	/* Level of each component */
-	double video_level;
-	double fm_mono_level;
-	double fm_left_level;
-	double fm_right_level;
-	double am_audio_level;
-	double nicam_level;
-	double dance_level;
-	
-	/* Video */
-	int type;
-	
-	rational_t frame_rate;
-	rational_t frame_aspects[2];
-	int frame_orientation;
-	
-	int lines;
-	int hline;
-	int active_lines;
-	int interlace;
-	
-	double hsync_width;
-	double vsync_short_width;
-	double vsync_long_width;
-	double sync_rise; /* The 10% - 90% rise time */
-	
-	int invert_video;
-	double white_level;
-	double black_level;
-	double blanking_level;
-	double sync_level;
-	
-	double active_width;
-	double active_left;
-	
-	double gamma;
-	
-	char *teletext;
-	
-	char *wss;
-	
-	char *videocrypt;
-	char *videocrypt2;
-	char *videocrypts;
-	int syster;
-	int systeraudio;
-	int acp;
-	int vits;
-	int vitc;
-	char *sis;
-	char *eurocrypt;
-	
-	/* RGB weights, should add up to 1.0 */
-	double rw_co;
-	double gw_co;
-	double bw_co;
-	
-	int colour_mode;
-	rational_t colour_carrier;
-	
-	double burst_width;
-	double burst_left;
-	double burst_level;
-	double burst_rise;
-	
-	double fsc_flag_width;
-	double fsc_flag_left;
-	double fsc_flag_level;
-	
-	double ev_co;
-	double eu_co;
-	
-	int secam_field_id;
-	
-	/* FM audio (Mono) */
-	double fm_mono_carrier;
-	double fm_mono_deviation;
-	int fm_mono_preemph;
-	
-	/* FM audio (Stereo Left) */
-	double fm_left_carrier;
-	double fm_left_deviation;
-	int fm_left_preemph;
-	
-	/* FM audio (Stereo Right) */
-	double fm_right_carrier;
-	double fm_right_deviation;
-	int fm_right_preemph;
-	
-	/* A2 Stereo / Zweikanalton */
-	int a2stereo;
-	
-	/* Stereo NICAM audio */
-	double nicam_carrier;
-	double nicam_beta;
-	
-	/* DANCE audio */
-	double dance_carrier;
-	double dance_beta;
-	
-	/* AM audio */
-	double am_mono_carrier;
-	double am_mono_bandwidth;
-	
-	/* D/D2-MAC options */
-	int mac_mode;
-	uint16_t chid;
-	int mac_audio_stereo;
-	int mac_audio_quality;
-	int mac_audio_protection;
-	int mac_audio_companded;
-	int scramble_video;
-	int scramble_audio;
-	
-	/* Video filter enable flag */
-	int vfilter;
-	
+
+  /* Output type */
+  int output_type;
+
+  /* Output modulation */
+  int modulation;
+
+  /* Video bandwidth options */
+  double video_bw;
+
+  /* VSB modulation options */
+  double vsb_upper_bw;
+  double vsb_lower_bw;
+
+  /* FM modulation options */
+  double fm_level;
+  double fm_deviation;
+  double fm_energy_dispersal;
+
+  /* Overall signal level (pre-modulation) */
+  double level;
+
+  /* Swap the IQ in complex signals */
+  int swap_iq;
+
+  /* Raw video baseband input */
+  char *raw_bb_file;
+  int16_t raw_bb_blanking_level;
+  int16_t raw_bb_white_level;
+
+  /* Signal offset and passthru */
+  int64_t offset;
+  char *passthru;
+
+  /* Level of each component */
+  double video_level;
+  double fm_mono_level;
+  double fm_left_level;
+  double fm_right_level;
+  double am_audio_level;
+  double nicam_level;
+  double dance_level;
+
+  /* Video */
+  int type;
+
+  rational_t frame_rate;
+  rational_t frame_aspects[2];
+  int frame_orientation;
+
+  int lines;
+  int hline;
+  int active_lines;
+  int interlace;
+
+  double hsync_width;
+  double vsync_short_width;
+  double vsync_long_width;
+  double sync_rise; /* The 10% - 90% rise time */
+
+  int invert_video;
+  double white_level;
+  double black_level;
+  double blanking_level;
+  double sync_level;
+
+  double active_width;
+  double active_left;
+
+  double gamma;
+
+  char *teletext;
+
+  char *wss;
+
+  char *videocrypt;
+  char *videocrypt2;
+  char *videocrypts;
+  int syster;
+  int systeraudio;
+  int acp;
+  int vits;
+  int vitc;
+  char *sis;
+  char *eurocrypt;
+
+  /* RGB weights, should add up to 1.0 */
+  double rw_co;
+  double gw_co;
+  double bw_co;
+
+  int colour_mode;
+  rational_t colour_carrier;
+
+  double burst_width;
+  double burst_left;
+  double burst_level;
+  double burst_rise;
+
+  double fsc_flag_width;
+  double fsc_flag_left;
+  double fsc_flag_level;
+
+  double ev_co;
+  double eu_co;
+
+  int secam_field_id;
+
+  /* FM audio (Mono) */
+  double fm_mono_carrier;
+  double fm_mono_deviation;
+  int fm_mono_preemph;
+
+  /* FM audio (Stereo Left) */
+  double fm_left_carrier;
+  double fm_left_deviation;
+  int fm_left_preemph;
+
+  /* FM audio (Stereo Right) */
+  double fm_right_carrier;
+  double fm_right_deviation;
+  int fm_right_preemph;
+
+  /* A2 Stereo / Zweikanalton */
+  int a2stereo;
+
+  /* Stereo NICAM audio */
+  double nicam_carrier;
+  double nicam_beta;
+
+  /* DANCE audio */
+  double dance_carrier;
+  double dance_beta;
+
+  /* AM audio */
+  double am_mono_carrier;
+  double am_mono_bandwidth;
+
+  /* D/D2-MAC options */
+  int mac_mode;
+  uint16_t chid;
+  int mac_audio_stereo;
+  int mac_audio_quality;
+  int mac_audio_protection;
+  int mac_audio_companded;
+  int scramble_video;
+  int scramble_audio;
+
+  /* Video filter enable flag */
+  int vfilter;
+
 } vid_config_t;
 
 typedef struct {
-	const char *id;
-	const vid_config_t *conf;
-	const char *desc;
+  const char *id;
+  const vid_config_t *conf;
+  const char *desc;
 } vid_configs_t;
 
 typedef struct {
-	int16_t y;
-	int16_t i;
-	int16_t q;
+  int16_t y;
+  int16_t i;
+  int16_t q;
 } _yiq16_t;
 
 struct vid_line_t {
-	
-	/* The output line buffer */
-	int16_t *output;
-	int width;
-	
-	/* Frame and line number */
-	int frame;
-	int line;
-	
-	/* Colour subcarrier (complex) */
-	const cint16_t *lut;
-	
-	/* Status */
-	int vbialloc;
-	
-	/* Pointer the previous and next line */
-	vid_line_t *previous;
-	vid_line_t *next;
+
+  /* The output line buffer */
+  int16_t *output;
+  int width;
+
+  /* Frame and line number */
+  int frame;
+  int line;
+
+  /* Colour subcarrier (complex) */
+  const cint16_t *lut;
+
+  /* Status */
+  int vbialloc;
+
+  /* Pointer the previous and next line */
+  vid_line_t *previous;
+  vid_line_t *next;
 };
 
 /* Line process function prototypes */
@@ -313,161 +313,161 @@ typedef void (*vid_lineprocess_free_t)(vid_t *s, void *arg);
 typedef struct _lineprocess_t _lineprocess_t;
 
 struct _lineprocess_t {
-	
-	/* A simple identifier for this process */
-	char name[16];
-	
-	/* Line window */
-	int nlines;
-	vid_line_t **lines;
-	
-	/* Process callbacks */
-	vid_lineprocess_process_t process;
-	vid_lineprocess_free_t free;
-	
-	/* Callback parameters */
-	vid_t *vid;
-	void *arg;
+
+  /* A simple identifier for this process */
+  char name[16];
+
+  /* Line window */
+  int nlines;
+  vid_line_t **lines;
+
+  /* Process callbacks */
+  vid_lineprocess_process_t process;
+  vid_lineprocess_free_t free;
+
+  /* Callback parameters */
+  vid_t *vid;
+  void *arg;
 };
 
 struct vid_t {
-	
-	/* AV source */
-	av_t av;
-	
-	/* Signal configuration */
-	vid_config_t conf;
-	int sample_rate;
-	
-	/* Video setup */
-	int pixel_rate;
-	
-	int width;
-	int half_width;
-	int active_width;
-	int active_left;
-	
-	vbidata_lut_t *syncs;
-	
-	int16_t white_level;
-	int16_t black_level;
-	int16_t blanking_level;
-	int16_t sync_level;
-	
-	_yiq16_t *yiq_level_lookup;
-	
-	unsigned int colour_lookup_width;
-	unsigned int colour_lookup_offset;
-	cint16_t *colour_lookup;
-	
-	cint16_t burst_phase;
-	int burst_left;
-	int burst_width;
-	int16_t *burst_win;
-	
-	_mod_fm_t fm_secam;
-	iir_int16_t fm_secam_iir;
-	fir_int16_t fm_secam_fir;
-	int16_t fm_secam_dmin[2];
-	int16_t fm_secam_dmax[2];
-	fir_int16_t secam_l_fir;
-	cint16_t *fm_secam_bell;
-	int16_t secam_fsync_level;
-	
-	vbidata_lut_t *fsc_syncs;
-	
-	/* Video state */
-	av_frame_t vframe;
-	int vframe_x;
-	int vframe_y;
-	
-	/* The frame and line number being rendered next */
-	int bframe;
-	int bline;
-	
-	/* The frame and line number returned by vid_next_line() */
-	int frame;
-	int line;
-	
-	/* Raw baseband video file */
-	FILE *raw_bb_file;
-	
-	/* Teletext state */
-	tt_t tt;
-	
-	/* WSS state */
-	wss_t wss;
-	
-	/* Videocrypt state */
-	vc_t vc;
-	vcs_t vcs;
-	
-	/* Nagravision Syster state */
-	ng_t ng;
-	
-	/* ACP state */
-	acp_t acp;
-	
-	/* VITS state */
-	vits_t vits;
-	
-	/* VITC state */
-	vitc_t vitc;
-	
-	/* Audio state */
-	int audio;
-	int16_t *audiobuffer;
-	size_t audiobuffer_samples;
-	int interp;
-	
-	/* FM Mono/Stereo audio state */
-	_mod_fm_t fm_mono;
-	_mod_fm_t fm_left;
-	_mod_fm_t fm_right;
-	
-	/* Zweikanalton / A2 Stereo state */
-	int a2stereo_system_m;
-	_mod_am_t a2stereo_pilot;
-	_mod_am_t a2stereo_signal;
-	
-	/* NICAM stereo audio state */
-	nicam_mod_t nicam;
-	int16_t nicam_buf[NICAM_AUDIO_LEN * 2];
-	size_t nicam_buf_len;
-	
-	/* SiS state */
-	sis_t sis;
-	
-	/* DANCE audio state */
-	dance_mod_t dance;
-	int16_t dance_buf[DANCE_AUDIO_LEN * 2];
-	size_t dance_buf_len;
-	
-	/* AM Mono audio state */
-	_mod_am_t am_mono;
-	
-	/* FM Video state */
-	_mod_fm_t fm_video;
-	
-	/* Offset signal */
-	_mod_offset_t offset;
-	
-	/* Passthru source */
-	FILE *passthru;
-	int16_t *passline;
-	
-	/* D/D2-MAC specific data */
-	mac_t mac;
-	
-	/* Output line(s) buffer */
-	int olines;
-	vid_line_t *oline;
-	int max_width;
-	
-	/* Line processes */
-	int nprocesses;
-	_lineprocess_t *processes;
-	_lineprocess_t *output_process;
+
+  /* AV source */
+  av_t av;
+
+  /* Signal configuration */
+  vid_config_t conf;
+  int sample_rate;
+
+  /* Video setup */
+  int pixel_rate;
+
+  int width;
+  int half_width;
+  int active_width;
+  int active_left;
+
+  vbidata_lut_t *syncs;
+
+  int16_t white_level;
+  int16_t black_level;
+  int16_t blanking_level;
+  int16_t sync_level;
+
+  _yiq16_t *yiq_level_lookup;
+
+  unsigned int colour_lookup_width;
+  unsigned int colour_lookup_offset;
+  cint16_t *colour_lookup;
+
+  cint16_t burst_phase;
+  int burst_left;
+  int burst_width;
+  int16_t *burst_win;
+
+  _mod_fm_t fm_secam;
+  iir_int16_t fm_secam_iir;
+  fir_int16_t fm_secam_fir;
+  int16_t fm_secam_dmin[2];
+  int16_t fm_secam_dmax[2];
+  fir_int16_t secam_l_fir;
+  cint16_t *fm_secam_bell;
+  int16_t secam_fsync_level;
+
+  vbidata_lut_t *fsc_syncs;
+
+  /* Video state */
+  av_frame_t vframe;
+  int vframe_x;
+  int vframe_y;
+
+  /* The frame and line number being rendered next */
+  int bframe;
+  int bline;
+
+  /* The frame and line number returned by vid_next_line() */
+  int frame;
+  int line;
+
+  /* Raw baseband video file */
+  FILE *raw_bb_file;
+
+  /* Teletext state */
+  tt_t tt;
+
+  /* WSS state */
+  wss_t wss;
+
+  /* Videocrypt state */
+  vc_t vc;
+  vcs_t vcs;
+
+  /* Nagravision Syster state */
+  ng_t ng;
+
+  /* ACP state */
+  acp_t acp;
+
+  /* VITS state */
+  vits_t vits;
+
+  /* VITC state */
+  vitc_t vitc;
+
+  /* Audio state */
+  int audio;
+  int16_t *audiobuffer;
+  size_t audiobuffer_samples;
+  int interp;
+
+  /* FM Mono/Stereo audio state */
+  _mod_fm_t fm_mono;
+  _mod_fm_t fm_left;
+  _mod_fm_t fm_right;
+
+  /* Zweikanalton / A2 Stereo state */
+  int a2stereo_system_m;
+  _mod_am_t a2stereo_pilot;
+  _mod_am_t a2stereo_signal;
+
+  /* NICAM stereo audio state */
+  nicam_mod_t nicam;
+  int16_t nicam_buf[NICAM_AUDIO_LEN * 2];
+  size_t nicam_buf_len;
+
+  /* SiS state */
+  sis_t sis;
+
+  /* DANCE audio state */
+  dance_mod_t dance;
+  int16_t dance_buf[DANCE_AUDIO_LEN * 2];
+  size_t dance_buf_len;
+
+  /* AM Mono audio state */
+  _mod_am_t am_mono;
+
+  /* FM Video state */
+  _mod_fm_t fm_video;
+
+  /* Offset signal */
+  _mod_offset_t offset;
+
+  /* Passthru source */
+  FILE *passthru;
+  int16_t *passline;
+
+  /* D/D2-MAC specific data */
+  mac_t mac;
+
+  /* Output line(s) buffer */
+  int olines;
+  vid_line_t *oline;
+  int max_width;
+
+  /* Line processes */
+  int nprocesses;
+  _lineprocess_t *processes;
+  _lineprocess_t *output_process;
 };
 
 extern const vid_configs_t vid_configs[];
