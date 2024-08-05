@@ -49,49 +49,49 @@
 #define _J17_NTAPS 83
 
 typedef struct {
-	
-	uint8_t mode;
-	uint8_t reserve;
-	
-	unsigned int frame;
-	
-	uint8_t prn[NICAM_FRAME_BYTES - 1];
-	
-	int fir_p;
-	int16_t fir_l[_J17_NTAPS];
-	int16_t fir_r[_J17_NTAPS];
-	
+
+  uint8_t mode;
+  uint8_t reserve;
+
+  unsigned int frame;
+
+  uint8_t prn[NICAM_FRAME_BYTES - 1];
+
+  int fir_p;
+  int16_t fir_l[_J17_NTAPS];
+  int16_t fir_r[_J17_NTAPS];
+
 } nicam_enc_t;
 
 typedef struct {
-	
-	nicam_enc_t enc;
-	
-	int16_t audio[NICAM_AUDIO_LEN * 2];
-	
-	int ntaps;
-	int16_t *taps;
-	int16_t *hist;
-	
-	int dsym; /* Differential symbol */
-	
-	cint16_t *bb;
-	cint16_t *bb_start;
-	cint16_t *bb_end;
-	int bb_len;
-	
-	int sps;
-	int ds;
-	int dsl;
-	int decimation;
-	
-	cint16_t *cc;
-	cint16_t *cc_start;
-	cint16_t *cc_end;
-	
-	uint8_t frame[NICAM_FRAME_BYTES];
-	int frame_bit;
-	
+
+  nicam_enc_t enc;
+
+  int16_t audio[NICAM_AUDIO_LEN * 2];
+
+  int ntaps;
+  int16_t *taps;
+  int16_t *hist;
+
+  int dsym; /* Differential symbol */
+
+  cint16_t *bb;
+  cint16_t *bb_start;
+  cint16_t *bb_end;
+  int bb_len;
+
+  int sps;
+  int ds;
+  int dsl;
+  int decimation;
+
+  cint16_t *cc;
+  cint16_t *cc_start;
+  cint16_t *cc_end;
+
+  uint8_t frame[NICAM_FRAME_BYTES];
+  int frame_bit;
+
 } nicam_mod_t;
 
 extern void nicam_encode_init(nicam_enc_t *s, uint8_t mode, uint8_t reserve);
