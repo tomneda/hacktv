@@ -582,10 +582,13 @@ int main(int argc, char *argv[])
 				/* Unrecognised output type, default to file */
 				if(sub != NULL)
 				{
-					assert(0); // the construct below may write in non allocated memory, check if even called
           /* Recolonise */
+					// avoid false positive (?) warning: writing 1 byte into a region of size 0
+					#pragma GCC diagnostic push
+					#pragma GCC diagnostic ignored "-Wstringop-overflow"
 					sub--;
 					*sub = ':';
+					#pragma GCC diagnostic pop
 				}
 				
 				s.output_type = "file";
