@@ -13,8 +13,8 @@ set(CROSS_HOST "")
 
 set(CMAKE_C_COMPILER ${CROSS_HOST}gcc)
 set(PKGCONF pkg-config)
-set(CMAKE_C_FLAGS "-Wall -pthread ${EXTRA_CFLAGS} -DVERSION=\\\"${VERSION}\\\"")
-set(CMAKE_EXE_LINKER_FLAGS "-lm -pthread ${EXTRA_LDFLAGS}")
+set(CMAKE_C_FLAGS "-g -Wall -pthread ${EXTRA_CFLAGS} -DVERSION=\\\"${VERSION}\\\"")
+set(CMAKE_EXE_LINKER_FLAGS "-g -lm -pthread ${EXTRA_LDFLAGS}")
 
 include(FindPkgConfig)
 pkg_check_modules(PKGS REQUIRED libavcodec libavformat libavdevice libswscale libswresample libavutil ${EXTRA_PKGS})
