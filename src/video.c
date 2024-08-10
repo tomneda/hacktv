@@ -1292,6 +1292,7 @@ static int _vid_passthru_process(vid_t *s, void *arg, int nlines, vid_line_t **l
 
   size_t ret = fread(s->passline, sizeof(int16_t) * 2, l->width, s->passthru);
   assert(ret == l->width);
+	(void)ret;
 
   for(x = 0; x < l->width * 2; x++)
   {
