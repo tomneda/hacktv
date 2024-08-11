@@ -325,6 +325,131 @@ static int _vid_next_line_rawbb(vid_t *s, void *arg, int nlines, vid_line_t **li
   return(1);
 }
 
+static void secam_render(vid_t * s, const char * seq, int x, int vy, vid_line_t * l)
+{
+	const cint16_t *g;
+	int16_t dmin, dmax;
+	int sl = 0, sr = 0;
+
+	if(s->conf.secam_field_id &&
+	   ((l->line >= 7 && l->line <= 15) ||
+	    (l->line >= 320 && l->line <= 328)))
+	{
+		int16_t level;
+		int16_t dev;
+		double rw;
+
+		if(((l->frame * s->conf.lines) + l->line) & 1)
+		{
+			level = s->yiq_level_lookup[0x000000].q; // D'r
+			dev = s->secam_fsync_level;
+			rw = 15e-6;
+		}
+		else
+		{
+			level = s->yiq_level_lookup[0x000000].i; // D'b
+			dev = -s->secam_fsync_level;
+			rw = 18e-6;
+		}
+
+		for(x = 0; x < s->width; x++)
+		{
+			double t = (double) (x - s->active_left) / s->pixel_rate / rw;
+
+			if(t < 0) t = 0;
+			else if(t > 1) t = 1;
+
+			l->output[x * 2 + 1] = level + dev * t;
+		}
+
+		sl = s->burst_left;
+		sr = sl + s->burst_width;
+
+		l->vbialloc = 1;
+	}
+	else if(seq[2] == 'a' || seq[3] == 'a')
+	{
+		uint32_t rgb = 0x000000;
+		uint32_t *prgb = &rgb;
+		int stride = 0;
+
+		if(s->vframe.framebuffer && vy >= 0)
+		{
+			prgb = &s->vframe.framebuffer[vy * s->vframe.line_stride];
+			stride = s->vframe.pixel_stride;
+		}
+
+		if(((l->frame * s->conf.lines) + l->line) & 1)
+		{
+			/* D'r */
+
+			for(x = 0; x < s->active_left + s->vframe_x; x++)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].q;
+			}
+
+			for(; x < s->active_left + s->vframe_x + s->vframe.width; x++, prgb += stride)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[*prgb & 0xFFFFFF].q;
+			}
+
+			for(; x < s->width; x++)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].q;
+			}
+		}
+		else
+		{
+			/* D'b */
+
+			for(x = 0; x < s->active_left + s->vframe_x; x++)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].i;
+			}
+
+			for(; x < s->active_left + s->vframe_x + s->vframe.width; x++, prgb += stride)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[*prgb & 0xFFFFFF].i;
+			}
+
+			for(; x < s->width; x++)
+			{
+				l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].i;
+			}
+		}
+
+		sl = s->burst_left;
+		sr = seq[3] == 'a' ? sl + s->burst_width : s->half_width;
+	}
+
+	if(sr > sl)
+	{
+		fir_int16_process_block(&s->secam_l_fir, l->output + s->active_left * 2, l->output + s->active_left * 2, s->active_width, 2);
+		fir_int16_process_block(&s->fm_secam_fir, l->output + 1, l->output + 1, s->width, 2);
+		iir_int16_process(&s->fm_secam_iir, l->output + 1, l->output + 1, s->width, 2);
+
+		/* Reset the SECAM FM phase every line, alternating every third line */
+		s->fm_secam.counter = INT16_MAX;
+		s->fm_secam.phase.i = ((l->frame * s->conf.lines) + l->line) % 3 == 0 ? INT32_MAX : -INT32_MAX;
+		s->fm_secam.phase.q = 0;
+
+		/* Limit the FM deviation */
+		dmin = s->fm_secam_dmin[((l->frame * s->conf.lines) + l->line) & 1];
+		dmax = s->fm_secam_dmax[((l->frame * s->conf.lines) + l->line) & 1];
+
+		for(x = sl; x < sr; x++)
+		{
+			if(l->output[x * 2 + 1] < dmin) l->output[x * 2 + 1] = dmin;
+			else if(l->output[x * 2 + 1] > dmax) l->output[x * 2 + 1] = dmax;
+
+			g = &s->fm_secam_bell[(uint16_t) l->output[x * 2 + 1]];
+			_fm_modulator_cgain(&s->fm_secam, &l->output[x * 2 + 1], l->output[x * 2 + 1], g);
+
+			l->output[x * 2] += (l->output[x * 2 + 1] * s->burst_win[x - s->burst_left]) >> 15;
+		}
+	}
+}
+
 static int _vid_next_line_raster(vid_t *s, void *arg, int nlines, vid_line_t **lines)
 {
   const char *seq;
@@ -887,127 +1012,7 @@ static int _vid_next_line_raster(vid_t *s, void *arg, int nlines, vid_line_t **l
   /* Render the SECAM colour subcarrier */
   if(s->conf.colour_mode == VID_SECAM)
   {
-    const cint16_t *g;
-    int16_t dmin, dmax;
-    int sl = 0, sr = 0;
-
-    if(s->conf.secam_field_id &&
-       ((l->line >= 7 && l->line <= 15) ||
-        (l->line >= 320 && l->line <= 328)))
-    {
-      int16_t level;
-      int16_t dev;
-      double rw;
-
-      if(((l->frame * s->conf.lines) + l->line) & 1)
-      {
-        level = s->yiq_level_lookup[0x000000].q; // D'r
-        dev = s->secam_fsync_level;
-        rw = 15e-6;
-      }
-      else
-      {
-        level = s->yiq_level_lookup[0x000000].i; // D'b
-        dev = -s->secam_fsync_level;
-        rw = 18e-6;
-      }
-
-      for(x = 0; x < s->width; x++)
-      {
-        double t = (double) (x - s->active_left) / s->pixel_rate / rw;
-
-        if(t < 0) t = 0;
-        else if(t > 1) t = 1;
-
-        l->output[x * 2 + 1] = level + dev * t;
-      }
-
-      sl = s->burst_left;
-      sr = sl + s->burst_width;
-
-      l->vbialloc = 1;
-    }
-    else if(seq[2] == 'a' || seq[3] == 'a')
-    {
-      uint32_t rgb = 0x000000;
-      uint32_t *prgb = &rgb;
-      int stride = 0;
-
-      if(s->vframe.framebuffer && vy >= 0)
-      {
-        prgb = &s->vframe.framebuffer[vy * s->vframe.line_stride];
-        stride = s->vframe.pixel_stride;
-      }
-
-      if(((l->frame * s->conf.lines) + l->line) & 1)
-      {
-        /* D'r */
-
-        for(x = 0; x < s->active_left + s->vframe_x; x++)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].q;
-        }
-
-        for(; x < s->active_left + s->vframe_x + s->vframe.width; x++, prgb += stride)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[*prgb & 0xFFFFFF].q;
-        }
-
-        for(; x < s->width; x++)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].q;
-        }
-      }
-      else
-      {
-        /* D'b */
-
-        for(x = 0; x < s->active_left + s->vframe_x; x++)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].i;
-        }
-
-        for(; x < s->active_left + s->vframe_x + s->vframe.width; x++, prgb += stride)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[*prgb & 0xFFFFFF].i;
-        }
-
-        for(; x < s->width; x++)
-        {
-          l->output[x * 2 + 1] = s->yiq_level_lookup[0x000000].i;
-        }
-      }
-
-      sl = s->burst_left;
-      sr = seq[3] == 'a' ? sl + s->burst_width : s->half_width;
-    }
-
-    if(sr > sl)
-    {
-      fir_int16_process_block(&s->secam_l_fir, l->output + s->active_left * 2, l->output + s->active_left * 2, s->active_width, 2);
-      fir_int16_process_block(&s->fm_secam_fir, l->output + 1, l->output + 1, s->width, 2);
-      iir_int16_process(&s->fm_secam_iir, l->output + 1, l->output + 1, s->width, 2);
-
-      /* Reset the SECAM FM phase every line, alternating every third line */
-      s->fm_secam.counter = INT16_MAX;
-      s->fm_secam.phase.i = ((l->frame * s->conf.lines) + l->line) % 3 == 0 ? INT32_MAX : -INT32_MAX;
-      s->fm_secam.phase.q = 0;
-
-      /* Limit the FM deviation */
-      dmin = s->fm_secam_dmin[((l->frame * s->conf.lines) + l->line) & 1];
-      dmax = s->fm_secam_dmax[((l->frame * s->conf.lines) + l->line) & 1];
-
-      for(x = sl; x < sr; x++)
-      {
-        if(l->output[x * 2 + 1] < dmin) l->output[x * 2 + 1] = dmin;
-        else if(l->output[x * 2 + 1] > dmax) l->output[x * 2 + 1] = dmax;
-
-        g = &s->fm_secam_bell[(uint16_t) l->output[x * 2 + 1]];
-        _fm_modulator_cgain(&s->fm_secam, &l->output[x * 2 + 1], l->output[x * 2 + 1], g);
-
-        l->output[x * 2] += (l->output[x * 2 + 1] * s->burst_win[x - s->burst_left]) >> 15;
-      }
-    }
+	  secam_render(s, seq, x, vy, l);
   }
 
   /* Clear the Q channel */
@@ -1087,6 +1092,7 @@ static int _vid_audio_process(vid_t *s, void *arg, int nlines, vid_line_t **line
       if(s->conf.fm_mono_level > 0 && s->conf.fm_mono_carrier != 0)
       {
         s->fm_mono.sample = (audio[0] + audio[1]) / 2;
+
         if(s->fm_mono.limiter.width)
         {
           limiter_process(&s->fm_mono.limiter, &s->fm_mono.sample, &s->fm_mono.sample, &s->fm_mono.sample, 1, 1);
@@ -2156,7 +2162,7 @@ int vid_init(vid_t *s, unsigned int sample_rate, unsigned int pixel_rate, const 
   /* NICAM audio */
   if(s->conf.nicam_level > 0 && s->conf.nicam_carrier != 0)
   {
-    r = nicam_mod_init(&s->nicam, NICAM_MODE_STEREO, 1, s->sample_rate, s->conf.nicam_carrier, s->conf.nicam_beta, s->conf.nicam_level * slevel);
+    r = nicam_mod_init(&s->nicam, NICAM_MODE_STEREO, 0, s->sample_rate, s->conf.nicam_carrier, s->conf.nicam_beta, s->conf.nicam_level * slevel);
 
     if(r != 0)
     {
